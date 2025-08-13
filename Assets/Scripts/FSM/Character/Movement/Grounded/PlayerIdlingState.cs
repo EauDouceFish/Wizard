@@ -17,8 +17,6 @@ public class PlayerIdlingState : PlayerGroundedState
     {
         stateMachine.ReusableData.MovementSpeedModifier = 0.0f;
 
-        // Camera
-
         base.Enter();
 
         StartAnimation(stateMachine.Player.AnimationData.IdleParameterHash);

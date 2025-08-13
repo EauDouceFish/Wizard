@@ -11,11 +11,12 @@ public class GameCore : Architecture<GameCore>
         // ×¢²áModel
         this.RegisterModel(new GameCoreModel());
         this.RegisterModel(new MapModel());
-
-        //this.RegisterModel(new PlayerModel());
-        //this.RegisterModel(new EnemyModel());
-        //this.RegisterModel(new BuffModel());
-        //this.RegisterModel(new AudioModel());
+        this.RegisterModel(new MagicInputModel());
+        this.RegisterModel(new PlayerModel());
+        this.RegisterModel(new GameEntityModel());
+        this.RegisterModel(new PropModel());
+        this.RegisterModel(new AudioModel());
+        this.RegisterModel(new MagicSpellModel());
 
         // ÓÎÏ·Âß¼­Ïà¹Ø
         // ×¢²áSystem
@@ -24,11 +25,13 @@ public class GameCore : Architecture<GameCore>
         this.RegisterSystem(new InteractionSystem());
         this.RegisterSystem(new GameFlowSystem());
         this.RegisterSystem(new MagicSpellSystem());
-        //this.RegisterSystem(new AudioSystem());
+        this.RegisterSystem(new ActorManageSystem());
+        this.RegisterSystem(new AIDirectorSystem());
+        this.RegisterSystem(new CharacterGrowthSystem());
+        this.RegisterSystem(new AudioSystem());
         //this.RegisterSystem(new EffectSystem());
-        //this.RegisterSystem(new BuffSystem());
-        //this.RegisterSystem(new EnemySystem());
-        //this.RegisterSystem(new StateMachineSystem());
+        this.RegisterSystem(new AttributeSystem());
+        this.RegisterSystem(new UISystem());
 
         this.RegisterUtility(new Storage());
     }

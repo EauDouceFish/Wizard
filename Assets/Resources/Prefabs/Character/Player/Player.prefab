@@ -1766,6 +1766,7 @@ Transform:
   m_Children:
   - {fileID: 1988985058249495299}
   - {fileID: 1988985058249495405}
+  - {fileID: 2318601702079176914}
   - {fileID: 3840743238672561161}
   m_Father: {fileID: 3987895119137410738}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2592,7 +2593,8 @@ GameObject:
   - component: {fileID: 6272558199800544771}
   - component: {fileID: 2522405940762747795}
   - component: {fileID: 7364045862797154684}
-  m_Layer: 0
+  - component: {fileID: 8203935440382884351}
+  m_Layer: 8
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -2610,7 +2612,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1988985058249495357}
   m_Father: {fileID: 0}
@@ -2635,9 +2637,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.2
-  m_Height: 0.75
+  m_Height: 1.5
   m_Direction: 1
-  m_Center: {x: 0, y: 0.925, z: 0}
+  m_Center: {x: 0, y: 1.05, z: 0}
 --- !u!114 &6272558199800544771
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2650,9 +2652,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e17978e96e0dace428c0c17d5ca29fa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_MaxHealth: 300
+  m_CurrentHealth: 300
   playerData: {fileID: 11400000, guid: 944620844279daa4c9a8b6a907ddad5e, type: 2}
   movementData:
-    <BaseSpeed>k__BackingField: 5
+    <BaseSpeed>k__BackingField: 10
     <SlopeSpeedAngles>k__BackingField:
       serializedVersion: 2
       m_Curve:
@@ -2714,7 +2718,7 @@ MonoBehaviour:
       <RotationData>k__BackingField:
         <TargetRotationReachTime>k__BackingField: {x: 0, y: 0, z: 0}
       <TimeToBeConsideredConsecutive>k__BackingField: 0.5
-      <ConsecutiveDashesLimitAmount>k__BackingField: 2
+      <ConsecutiveDashesLimitAmount>k__BackingField: 1.54
     <StopData>k__BackingField:
       <LightDecelerationForce>k__BackingField: 1
       <MediumDecelerationForce>k__BackingField: 3.5
@@ -2722,9 +2726,13 @@ MonoBehaviour:
   currentMovementState: 
   currentCombatState: 
   enemy: {fileID: 0}
+  spellCastPos: {fileID: 2318601702079176914}
+  enemyLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
   <ColliderUtility>k__BackingField:
     <DefaultColliderData>k__BackingField:
-      <Height>k__BackingField: 1
+      <Height>k__BackingField: 2
       <CenterY>k__BackingField: 0.8
       <Radius>k__BackingField: 0.2
     <SlopeData>k__BackingField:
@@ -2739,10 +2747,10 @@ MonoBehaviour:
     stoppingParameterName: Stopping
     idleParameterName: IsIdling
     dashParameterName: IsDashing
-    walkParameterName: IsWalking
     runParameterName: IsRunning
     mediumStopParameterName: IsMediumStopping
     hardStopParameterName: IsHardStopping
+    castSpellParameterName: IsCastingSpell
   <LayerData>k__BackingField:
     <GroundLayer>k__BackingField:
       serializedVersion: 2
@@ -2786,6 +2794,49 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 1
+--- !u!114 &8203935440382884351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2923620135832664249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4dc819b140305e49a04c62dac3af56f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &3426740977207266682
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2318601702079176914}
+  m_Layer: 0
+  m_Name: SpellCastPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2318601702079176914
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3426740977207266682}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0.824}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1988985058249495357}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8381755312007655405
 GameObject:
   m_ObjectHideFlags: 0

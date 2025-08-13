@@ -7,6 +7,7 @@ using UnityEngine;
 public class GroundModelFillStep : IMapGenerationStep
 {
     Storage storage;
+
     public void Execute(MapModel mapModel)
     {
         storage = mapModel.GetUtility<Storage>();
@@ -29,7 +30,7 @@ public class GroundModelFillStep : IMapGenerationStep
             Material cellMaterial = hexCell.HexRealm.GetRealmBiome().CommonMaterial;
 
             Vector3[] groundPos = hexCell.GetCornerPositionSemi();
-            
+
             // 处理边块
             for (int i = 0; i < groundPos.Length; i++)
             {
@@ -46,12 +47,14 @@ public class GroundModelFillStep : IMapGenerationStep
                 // 随机旋转
                 float randomYRotation = Random.Range(0f, 360f);
                 groundModel.transform.rotation = Quaternion.Euler(0f, randomYRotation, 0f);
+                groundModel.transform.localScale *= mapModel.ScaleParam;
             }
 
             // 处理中心块
             GameObject centerGround = grounds[Random.Range(0, grounds.Length)];
             Vector3 centerOffset = centerGround.GetModelGeometryOffsetPos();
             GameObject centerModel = Object.Instantiate(centerGround, hexCell.transform.position + centerOffset, Quaternion.identity);
+            
             centerModel.SetMaterial(cellMaterial);
 
             // 随机旋转+缩放
@@ -60,6 +63,7 @@ public class GroundModelFillStep : IMapGenerationStep
             centerModel.transform.SetParent(groundGroup.transform);
             float randomScale = Random.Range(1.3f, 1.5f);
             centerModel.transform.localScale *= randomScale;
+            centerModel.transform.localScale *= mapModel.ScaleParam;
         }
     }
 

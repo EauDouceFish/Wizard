@@ -16,3 +16,4 @@ MonoBehaviour:
   biomeType: 0
   classicTexture: {fileID: 0}
   color: {r: 0.022694914, g: 0.2830189, b: 0.079759575, a: 0}
+  magicElement: 3

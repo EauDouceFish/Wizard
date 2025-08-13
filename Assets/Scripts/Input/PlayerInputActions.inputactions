@@ -72,7 +72,7 @@
                 {
                     "name": "Dash",
                     "type": "Button",
-                    "id": "01e8484c-1b16-4ad5-9498-fc954e76237c",
+                    "id": "359a198c-f6ab-427c-91e9-55cfa00ee38e",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -159,7 +159,7 @@
                 },
                 {
                     "name": "",
-                    "id": "a62c9869-04da-43f8-8556-262fc5fadefc",
+                    "id": "eb92cbe4-9268-402c-ba88-94dc9d20731e",
                     "path": "<Keyboard>/shift",
                     "interactions": "",
                     "processors": "",

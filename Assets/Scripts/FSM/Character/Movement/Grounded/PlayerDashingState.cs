@@ -122,12 +122,12 @@ public class PlayerDashingState : PlayerGroundedState
     private void CheckWillDashMoreThenDestinationAndReset()
     {
         Vector3 currentPosition = stateMachine.Player.transform.position;
-        Vector3 remainDistance = stateMachine.ReusableData.ClickTargetPosition - currentPosition;
+        Vector3 remainDistance = stateMachine.ReusableData.RightClickTargetPosition - currentPosition;
         remainDistance.y = 0;
         float remainDistanceMagnitude = remainDistance.magnitude;
         if (dashDistance > remainDistanceMagnitude)
         {
-            stateMachine.ReusableData.ClickTargetPosition = GOExtensions.GetGroundPosition(dashTargetPosition);
+            stateMachine.ReusableData.RightClickTargetPosition = GOExtensions.GetGroundPosition(dashTargetPosition);
             Debug.Log("Dash距离超过目标距离，重新设定距离");
         }
     }

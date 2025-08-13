@@ -22,6 +22,8 @@ public class Biome
     public Texture2D BiomeClassicTex { get; set; }     // 群系经典纹理
     public Color Color { get; set; }                   // 群系颜色    
 
+    public MagicElement MagicElement { get; set; }      // 群系元素类型
+
     public Material CommonMaterial { get; set; }        // 群系通用材质
 
     public Biome(BiomeSO biomeSO)
@@ -30,6 +32,7 @@ public class Biome
         BiomeClassicTex = biomeSO.classicTexture;
         CommonMaterial = biomeSO.commonMaterial;
         Color = biomeSO.color;
+        MagicElement = biomeSO.magicElement;    
     }
 
 }

@@ -11,5 +11,6 @@ public class BiomeSO : ScriptableObject
     public Material commonMaterial;                   // 群系通用材质
     public BiomeType biomeType;                       // 当前群系类型
     public Texture2D classicTexture;                  // 群系经典纹理
-    public Color color;                               // 群系代表颜色
+    public Color color;
+    public MagicElement magicElement;                        // 群系代表元素
 }

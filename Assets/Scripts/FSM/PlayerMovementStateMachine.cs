@@ -31,6 +31,9 @@ public class PlayerMovementStateMachine : StateMachine, ICanSendEvent
     // - Moving（手动，未来移动端拓展）
     //public PlayerWalkingState WalkingState { get; }
     public PlayerRunningState RunningState { get; }
+
+    // 施法状态
+    public PlayerCastSpellState CastSpellState { get; }
     // - Stopping
     //public PlayerLightStoppingState LightStoppingState { get; }
     //public PlayerMediumStoppingState MediumStoppingState { get; }
@@ -47,7 +50,7 @@ public class PlayerMovementStateMachine : StateMachine, ICanSendEvent
         DashingState = new PlayerDashingState(this);
         //WalkingState = new PlayerWalkingState(this);
         RunningState = new PlayerRunningState(this);
-        //NavigatingState = new PlayerNavigatingState(this); // PC端，后续可拓展到3种
+        CastSpellState = new PlayerCastSpellState(this);
 
         //LightStoppingState = new PlayerLightStoppingState(this);
         //MediumStoppingState = new PlayerMediumStoppingState(this);
@@ -103,7 +106,7 @@ public class PlayerMovementStateMachine : StateMachine, ICanSendEvent
     /// <param name="targetPosition"></param>
     public void SetClickTarget(Vector3 targetPosition)
     {
-        ReusableData.ClickTargetPosition = targetPosition;
+        ReusableData.RightClickTargetPosition = targetPosition;
         ReusableData.HasClickTarget = true;
 
         // 切换到Running状态
@@ -116,7 +119,7 @@ public class PlayerMovementStateMachine : StateMachine, ICanSendEvent
     public void ClearClickTarget()
     {
         ReusableData.HasClickTarget = false;
-        ReusableData.ClickTargetPosition = Vector3.zero;
+        ReusableData.RightClickTargetPosition = Vector3.zero;
     }
 
     /// <summary>
@@ -127,8 +130,48 @@ public class PlayerMovementStateMachine : StateMachine, ICanSendEvent
     {
         if (!ReusableData.HasClickTarget) return false;
 
-        float distance = Vector3.Distance(GetPlayerPosition(), ReusableData.ClickTargetPosition);
+        float distance = Vector3.Distance(GetPlayerPosition(), ReusableData.RightClickTargetPosition);
         return distance <= ReusableData.ClickTargetReachDistance;
+    }
+
+    public void StartChanneling(BasicSpellInstance spellInstance, Vector3 targetPosition)
+    {
+        ReusableData.IsChanneling = true;
+        ReusableData.IsInstantCast = false;
+        ReusableData.CastTargetPosition = targetPosition;
+        ReusableData.CurrentChannelSpell = spellInstance;
+
+        ChangeState(CastSpellState);
+    }
+
+    public void StartInstantCast(BasicSpellInstance spellInstance, Vector3 targetPosition)
+    {
+        ReusableData.IsChanneling = false;
+        ReusableData.IsInstantCast = true;
+        ReusableData.CastTargetPosition = targetPosition;
+        ReusableData.CurrentChannelSpell = spellInstance;
+
+        ChangeState(CastSpellState);
+
+    }
+
+    /// <summary>
+    /// 停止蓄力施法
+    /// </summary>
+    public void StopChanneling()
+    {
+        ReusableData.IsChanneling = false;
+        ReusableData.CurrentChannelSpell = null;
+
+        // 根据之前的状态决定切换到哪个状态
+        if (ReusableData.MovementInput != Vector2.zero)
+        {
+            ChangeState(RunningState);
+        }
+        else
+        {
+            ChangeState(IdlingState);
+        }
     }
 
     #endregion

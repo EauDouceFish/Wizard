@@ -4,26 +4,25 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class MapCreateUI : MonoBehaviour, IController
+public class MapCreateUI : UIPanelBase
 {
-    [SerializeField] private List<BiomeSO> biomeSOList;
     [SerializeField] private Button miniMapButton;
     [SerializeField] private Button smallMapButton;
     [SerializeField] private Button mediumMapButton;
     [SerializeField] private Button largeMapButton;
-
-    private MapModel mapModel;
+    [SerializeField] private MapSelectDescUI mapDescUI;
 
     // 方便处理按钮，添加字典，方便批处理
     private Dictionary<Button, MapSize> buttonMap;
 
 
-    private void Awake()
+    protected override void Awake()
     {
-        mapModel = this.GetModel<MapModel>();
+        base.Awake();
 
         buttonMap = new Dictionary<Button, MapSize>()
         {
@@ -40,30 +39,48 @@ public class MapCreateUI : MonoBehaviour, IController
                 OnMapSizeSelected(kv.Value);
                 this.SendCommand<StartGameCommand>();
             });
+
+            AddHoverEvents(kv.Key, kv.Value);
+        }
+    }
+
+    private void AddHoverEvents(Button button, MapSize mapSize)
+    {
+        EventTrigger trigger = button.gameObject.GetComponent<EventTrigger>();
+        if (trigger == null)
+        {
+            trigger = button.gameObject.AddComponent<EventTrigger>();
         }
 
-        foreach (BiomeSO biomeSO in biomeSOList)
-        {
-            // 随机选择四个点位
-        }
+        // 鼠标进入事件
+        EventTrigger.Entry pointerEnter = new EventTrigger.Entry();
+        pointerEnter.eventID = EventTriggerType.PointerEnter;
+        pointerEnter.callback.AddListener((data) => {
+            if (mapDescUI != null)
+            {
+                mapDescUI.UpdateMapDescription(mapSize);
+            }
+            else
+            {
+                Debug.LogWarning("不存在描述UI面板");
+            }
+        });
+        trigger.triggers.Add(pointerEnter);
     }
 
     // Button选择地图大小后，设置数据并且执行生成
     private void OnMapSizeSelected(MapSize size)
     {
-        mapModel.SetCurrentMapSize(size);
+        MapConfigurationManager.SetSelectedMapSize(size);
     }
 
+
     #region 辅助方法
-/*
-    private void SetMapSize(MapSize size)
-    {
-        mapModel.SetCurrentMapSize(size);
-    }
-*/
+    /*
+        private void SetMapSize(MapSize size)
+        {
+            mapModel.SetCurrentMapSize(size);
+        }
+    */
     #endregion
-    public IArchitecture GetArchitecture()
-    {
-        return GameCore.Interface;
-    }
 }

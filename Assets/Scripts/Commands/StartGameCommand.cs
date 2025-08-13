@@ -11,5 +11,8 @@ public class StartGameCommand : AbstractCommand, ICanSendCommand
         LoadingViewController loadingViewController = canvas.Find<LoadingViewController>("LoadingViewController");
         loadingViewController.gameObject.SetActive(true);
         loadingViewController.LoadGame();
+
+        GameCore.Interface.Deinit();
+        GameCore.InitArchitecture();
     }
 }

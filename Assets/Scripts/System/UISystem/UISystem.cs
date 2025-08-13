@@ -17,6 +17,20 @@ public class UISystem : AbstractSystem
         storage = this.GetUtility<Storage>();
     }
 
+    public T FindUIPanelBase<T>() where T : UIPanelBase
+    {
+        GameObject canvas = GOExtensions.GetCanvas();
+        T component = canvas.GetComponentInChildren<T>();
+        if (component != null)
+        {
+            return component;
+        }
+        else
+        {
+            Debug.LogWarning($"在Canvas中找不到类型为 {typeof(T)} 的组件");
+            return null;
+        }
+    }
     /// <summary>
     /// 打开UIPanel并推入栈（放在栈顶）
     /// </summary>

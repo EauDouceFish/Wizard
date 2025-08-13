@@ -1,10 +1,11 @@
-using QFramework;
+ï»¿using QFramework;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
 
 /// <summary>
-/// Áù±ßĞÎµ¥Ôª¸ñ£¬×Ô¼º¹ÜÀí×Ô¼ºµÄÊı¾İºÍĞĞÎª£¬±ê×¼ÎªºáÏò°Ú·Å£¨¼â¶ËË®Æ½³¯Ïò£©
+/// å…­è¾¹å½¢å•å…ƒæ ¼ï¼Œè‡ªå·±ç®¡ç†è‡ªå·±çš„æ•°æ®å’Œè¡Œä¸ºï¼Œæ ‡å‡†ä¸ºæ¨ªå‘æ‘†æ”¾ï¼ˆå°–ç«¯æ°´å¹³æœå‘ï¼‰
 /// </summary>
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 public class HexCell : MonoBehaviour, IController
@@ -13,8 +14,8 @@ public class HexCell : MonoBehaviour, IController
     MapGenerationSystem mapGenerationSystem;
     MapModel mapModel;
 
-    // Áù±ßĞÎCellµÄÎ¨Ò»±êÊ¶·û
-    [Header("Ñ°Â·ÊôĞÔ")]
+    // å…­è¾¹å½¢Cellçš„å”¯ä¸€æ ‡è¯†ç¬¦
+    [Header("å¯»è·¯å±æ€§")]
     public float costFromOrigin = 0f;
     public float costToDestination = 0f;
     private int terrainCost = 0;
@@ -28,30 +29,43 @@ public class HexCell : MonoBehaviour, IController
     }
     public float TotalCost => costFromOrigin + costToDestination + terrainCost;
 
-    [Header("Á¬½Ó×´Ì¬")]
-    // ±£´æÁù¸ö±ß½çµÄĞÅÏ¢
+    [Header("è¿æ¥çŠ¶æ€")]
+    // ä¿å­˜å…­ä¸ªè¾¹ç•Œçš„ä¿¡æ¯
     public HexCellEdge[] edges;
-    // ÁùÌõ±ßÊÇ·ñÁ¬½Óµ½µÀÂ·
-    //public bool[] edgeRoadConnected = new bool[6];
+    // å…­æ¡è¾¹æ˜¯å¦è¿æ¥åˆ°é“è·¯
     public HexCell pathParent;
     public HexCell connectedCell;
 
-    // »º´æÊı¾İ
+    [Header("æœ‰è§„åˆ™åˆ†å¸ƒåœ°å›¾æ”¯æŒ")]
+    public int difficultyLevel = 0;         // éš¾åº¦ç­‰çº§ï¼Œä»¥åˆæ¬¡ç”Ÿæˆçš„æœ€é•¿ä¸»è·¯å¾„ä¸ºå‚ç…§ï¼ˆ1~xï¼‰
+    public bool isMainPath = false;         // æ˜¯å¦ä¸ºä¸»è·¯å¾„
+    public bool isPlayerSpawn = false;      // æ˜¯å¦ä¸ºç©å®¶å‡ºç”Ÿç‚¹
+    public bool isEndLocation = false;      // æ˜¯å¦ä¸ºBossä½ç½®
+
+    // ç¼“å­˜æ•°æ®
     public float innerRadius;
     public float outerRadius;
-    public Pos2D coord;                     // Áù±ßĞÎ×ø±ê
+    public Pos2D coord;                     // å…­è¾¹å½¢åæ ‡
 
     public bool isOccupied = false;
-    public HexRealm HexRealm { get; private set; } = null; // µ±Ç°CellËùÊôµÄÁìÓò
+    public HexRealm HexRealm { get; private set; } = null;  // å½“å‰Cellæ‰€å±çš„é¢†åŸŸ
+    public bool IsRealmInitCenter => HexRealm.GetInitHexCell() == this; 
 
-    // Unity ×é¼şÒıÓÃ
+    [Header("Debugæ•°å€¼æ˜¾ç¤º")]
+    [SerializeField] public TextMeshProUGUI difficultyText;     // éš¾åº¦æ˜¾ç¤ºæ–‡æœ¬
+    [SerializeField] public TextMeshProUGUI isSpawnPointText;   // å‡ºç”Ÿç‚¹
+    [SerializeField] public TextMeshProUGUI isFinalPointText;   // ç»“æŸç‚¹
+    [SerializeField] public TextMeshProUGUI isMainPathText;     // æ˜¯å¦ä¸ºä¸»è·¯å¾„
+
+
+    // Unity ç»„ä»¶å¼•ç”¨
     private MeshFilter meshFilter;
     private MeshCollider meshCollider;
     private MeshRenderer meshRenderer;
-    private Material originalMaterial;      // ³õÊ¼²ÄÖÊ
-    private Material instanceMaterial;      // ÊµÊ±²ÄÖÊ
+    private Material originalMaterial;      // åˆå§‹æè´¨
+    private Material instanceMaterial;      // å®æ—¶æè´¨
 
-    #region ÉúÃüÖÜÆÚ
+    #region ç”Ÿå‘½å‘¨æœŸ
     private void Awake()
     {
         mapGenerationSystem = this.GetSystem<MapGenerationSystem>();
@@ -62,13 +76,13 @@ public class HexCell : MonoBehaviour, IController
         meshRenderer = GetComponent<MeshRenderer>();
         originalMaterial = meshRenderer.material;
 
-        // ³õÊ¼»¯±ß½ç¶ÔÏó
+        // åˆå§‹åŒ–è¾¹ç•Œå¯¹è±¡
         InitializeEdges();
     }
 
     private void OnEnable()
     {
-        // »º´æÊı¾İ£¬·ÅÔÚStartÇ°½â¾öÊ±ĞòÎÊÌâ
+        // ç¼“å­˜æ•°æ®ï¼Œæ”¾åœ¨Startå‰è§£å†³æ—¶åºé—®é¢˜
         innerRadius = mapModel.HexInnerRadius;
         outerRadius = mapModel.HexOuterRadius;
     }
@@ -80,7 +94,7 @@ public class HexCell : MonoBehaviour, IController
 
     private void OnDestroy()
     {
-        // Ïú»Ù¶¯Ì¬´´½¨µÄMaterial
+        // é”€æ¯åŠ¨æ€åˆ›å»ºçš„Material
         if (instanceMaterial != null)
         {
             DestroyImmediate(instanceMaterial);
@@ -89,12 +103,44 @@ public class HexCell : MonoBehaviour, IController
 
     #endregion
 
-    #region Íâ²¿ĞŞ¸Ä·½·¨
+    #region å¤–éƒ¨ä¿®æ”¹æ–¹æ³•
 
-    #region ³õÊ¼»¯·½·¨
+    #region è°ƒè¯•æ–¹æ³•
+
+    public void SetDifficultyText(string text)
+    {
+#if UNITY_EDITOR
+        difficultyText.text = text;
+#endif
+    }
+
+    public void ShowIsSpawnPointText()
+    {
+#if UNITY_EDITOR
+        isSpawnPointText.gameObject.SetActive(true);
+#endif
+    }
+
+    public void ShowIsFinalPointText()
+    {
+#if UNITY_EDITOR
+        isFinalPointText.gameObject.SetActive(true);
+#endif
+    }
+
+    public void ShowIsMainPathText()
+    {
+#if UNITY_EDITOR
+        isMainPathText.gameObject.SetActive(true);
+#endif
+    }
+
+    #endregion
+
+    #region åˆå§‹åŒ–æ–¹æ³•
 
     /// <summary>
-    /// ÔÚXZÆ½Ãæ³õÊ¼»¯Ò»²ãÁù±ßĞÎ:ÊÀ½çÎ»ÖÃ¡¢×ø±ê
+    /// åœ¨XZå¹³é¢åˆå§‹åŒ–ä¸€å±‚å…­è¾¹å½¢:ä¸–ç•Œä½ç½®ã€åæ ‡
     /// </summary>
     public void InitializeXZ(Vector3 position, Pos2D coord)
     {
@@ -103,7 +149,7 @@ public class HexCell : MonoBehaviour, IController
     }
 
     /// <summary>
-    /// ÉèÖÃCell¹²ÏíMesh
+    /// è®¾ç½®Cellå…±äº«Mesh
     /// </summary>
     /// <param name="sharedMesh"></param>
     public void SetSharedMesh(Mesh sharedMesh)
@@ -115,12 +161,12 @@ public class HexCell : MonoBehaviour, IController
         }
         else
         {
-            Debug.LogWarning("´«ÈëµÄMeshÎª¿Õ£¡");
+            Debug.LogWarning("ä¼ å…¥çš„Meshä¸ºç©ºï¼");
         }
     }
 
     /// <summary>
-    /// ÉèÖÃHexCellËùÊôµÄÁìÓò
+    /// è®¾ç½®HexCellæ‰€å±çš„é¢†åŸŸ
     /// </summary>
     /// <param name="hexRealm"></param>
     public void SetHexRealm(HexRealm hexRealm)
@@ -129,7 +175,7 @@ public class HexCell : MonoBehaviour, IController
     }
 
     /// <summary>
-    /// ³õÊ¼»¯Áù¸ö±ß½ç¶ÔÏó
+    /// åˆå§‹åŒ–å…­ä¸ªè¾¹ç•Œå¯¹è±¡
     /// </summary>
     private void InitializeEdges()
     {
@@ -142,10 +188,10 @@ public class HexCell : MonoBehaviour, IController
 
     #endregion
 
-    #region ÑÕÉ«²âÊÔ£¬ºóĞøÌî³äÎªµØÍ¼
+    #region é¢œè‰²æµ‹è¯•ï¼Œåç»­å¡«å……ä¸ºåœ°å›¾
 
     /// <summary>
-    /// ÉèÖÃÑÕÉ«
+    /// è®¾ç½®é¢œè‰²
     /// </summary>
     public void SetColor(Color color)
     {
@@ -159,7 +205,7 @@ public class HexCell : MonoBehaviour, IController
     }
 
     /// <summary>
-    /// ÖØÖÃÑÕÉ«
+    /// é‡ç½®é¢œè‰²
     /// </summary>
     public void ResetColor()
     {
@@ -171,23 +217,23 @@ public class HexCell : MonoBehaviour, IController
 
     #endregion
 
-    #region Áù±ßĞÎÏà¹Ø·½·¨
+    #region å…­è¾¹å½¢ç›¸å…³æ–¹æ³•
 
     /// <summary>
-    /// ¸ù¾İË÷Òı»ñÈ¡Áù±ßĞÎÉÏµÄµãÎ»ÖÃ£¨0-11£¬Ã¿30¶ÈÒ»¸öµã¡£12µã·½ÏòµÄË÷ÒıÎª0£©
+    /// æ ¹æ®ç´¢å¼•è·å–å…­è¾¹å½¢ä¸Šçš„ç‚¹ä½ç½®ï¼ˆ0-11ï¼Œæ¯30åº¦ä¸€ä¸ªç‚¹ã€‚12ç‚¹æ–¹å‘çš„ç´¢å¼•ä¸º0ï¼‰
     /// </summary>
     public Vector3 GetEdgePointByIndex(int index)
     {
         if (index < 0)
         {
-            Debug.LogError("ÇëÊäÈëºÏ·¨Ë÷Òı, index >= 0");
+            Debug.LogError("è¯·è¾“å…¥åˆæ³•ç´¢å¼•, index >= 0");
             return Vector3.zero;
         }
 
         index %= 12;
         float angleDegrees = index * 30f;
 
-        float radius = (index % 2 != 0) ? outerRadius : innerRadius; // ÆæÊıÎª½Ç£¬Å¼ÊıÎª±ß
+        float radius = (index % 2 != 0) ? outerRadius : innerRadius; // å¥‡æ•°ä¸ºè§’ï¼Œå¶æ•°ä¸ºè¾¹
         float x = radius * Mathf.Sin(Mathf.Deg2Rad * angleDegrees);
         float z = radius * Mathf.Cos(Mathf.Deg2Rad * angleDegrees);
         //Debug.Log($"GetEdgePointByIndex: index={index}, angle={angleDegrees}, x={x}, z={z}");
@@ -195,7 +241,7 @@ public class HexCell : MonoBehaviour, IController
     }
 
     /// <summary>
-    /// ·µ»ØÃ¿¸ö¶¥µã£¨indexÆæÊıµã£©ºÍÖĞĞÄÁ¬ÏßµÄÏß¶ÎÖĞµã
+    /// è¿”å›æ¯ä¸ªé¡¶ç‚¹ï¼ˆindexå¥‡æ•°ç‚¹ï¼‰å’Œä¸­å¿ƒè¿çº¿çš„çº¿æ®µä¸­ç‚¹
     /// </summary>
     /// <returns></returns>
     public Vector3[] GetCornerPositionSemi()
@@ -205,7 +251,7 @@ public class HexCell : MonoBehaviour, IController
 
         for (int i = 0; i < 6; i++)
         {
-            // ÆæÊıË÷Òı£º1,3,5,7,9,11
+            // å¥‡æ•°ç´¢å¼•ï¼š1,3,5,7,9,11
             int cornerIndex = i * 2 + 1;
             Vector3 cornerPosition = GetEdgePointByIndex(cornerIndex);
             //Debug.Log($"{center} : {cornerPosition}");
@@ -216,19 +262,19 @@ public class HexCell : MonoBehaviour, IController
     }
 
     /// <summary>
-    /// ÉèÖÃÕ¼ÓÃ×´Ì¬£¬Õ¼ÓÃ×´Ì¬´ú±íxz
+    /// è®¾ç½®å ç”¨çŠ¶æ€ï¼Œå ç”¨çŠ¶æ€ä»£è¡¨xz
     /// </summary>
     public void SetOccupied(bool occupied)
     {
         isOccupied = occupied;
     }
     /// <summary>
-    /// ¸ù¾İÁ½¸öHexCellµÄ×ø±ê×Ô¶¯ÉèÖÃ±ß½çÁ¬½Ó
+    /// æ ¹æ®ä¸¤ä¸ªHexCellçš„åæ ‡è‡ªåŠ¨è®¾ç½®è¾¹ç•Œè¿æ¥
     /// </summary>
-    /// <param name="targetCell">ÒªÁ¬½ÓµÄÁÚ¾ÓCell</param>
+    /// <param name="targetCell">è¦è¿æ¥çš„é‚»å±…Cell</param>
     public void SetEdgeConnection(HexCell targetCell)
     {
-        // »ñÈ¡´Óµ±Ç°Cellµ½ÁÚ¾ÓCellµÄ·½Ïò
+        // è·å–ä»å½“å‰Cellåˆ°é‚»å±…Cellçš„æ–¹å‘
         HexDirection? direction = GetDirectionToNeighbourCell(targetCell);
 
         if (direction.HasValue)
@@ -239,7 +285,7 @@ public class HexCell : MonoBehaviour, IController
             HexCellEdge thisEdge = edges[edgeIndex];
             HexCellEdge targetEdge = targetCell.edges[oppositeEdgeIndex];
 
-            // Ïà»¥°ó¶¨±ß½çÁªÍ¨×´Ì¬
+            // ç›¸äº’ç»‘å®šè¾¹ç•Œè”é€šçŠ¶æ€
             if (edges != null && edgeIndex < edges.Length)
             {
                 thisEdge.edgeConnected = targetEdge; 
@@ -248,12 +294,12 @@ public class HexCell : MonoBehaviour, IController
         }
         else
         {
-            Debug.LogWarning($"Cell ({coord.x},{coord.y}) ºÍ Cell ({targetCell.coord.x},{targetCell.coord.y}) ²»ÏàÁÚ£¬ÎŞ·¨±ê¼ÇEdge¹«ÓÃ");
+            Debug.LogWarning($"Cell ({coord.x},{coord.y}) å’Œ Cell ({targetCell.coord.x},{targetCell.coord.y}) ä¸ç›¸é‚»ï¼Œæ— æ³•æ ‡è®°Edgeå…¬ç”¨");
         }
     }
 
     /// <summary>
-    /// °Ñ¶ÔÓ¦·½ÏòµÄEdgeÉèÖÃÎªµÀÂ·
+    /// æŠŠå¯¹åº”æ–¹å‘çš„Edgeè®¾ç½®ä¸ºé“è·¯
     /// </summary>
     public void SetDirectionEdgeIsRoad(HexDirection direction)
     {
@@ -261,10 +307,10 @@ public class HexCell : MonoBehaviour, IController
     }
 
     /// <summary>
-    /// »ñÈ¡´Óµ±Ç°Cellµ½ÏàÁÚCellµÄ·½Ïò
+    /// è·å–ä»å½“å‰Cellåˆ°ç›¸é‚»Cellçš„æ–¹å‘
     /// </summary>
-    /// <param name="neighborCell">ÁÚ¾ÓCell</param>
-    /// <returns>·½Ïò£¬Èç¹û²»ÏàÁÚ·µ»Ønull</returns>
+    /// <param name="neighborCell">é‚»å±…Cell</param>
+    /// <returns>æ–¹å‘ï¼Œå¦‚æœä¸ç›¸é‚»è¿”å›null</returns>
     public HexDirection? GetDirectionToNeighbourCell(HexCell neighborCell)
     {
         if (neighborCell == null) return null;
@@ -274,18 +320,18 @@ public class HexCell : MonoBehaviour, IController
     }
 
     /// <summary>
-    /// ¼ì²éÁ½¸öCellÊÇ·ñÏàÁÚ
+    /// æ£€æŸ¥ä¸¤ä¸ªCellæ˜¯å¦ç›¸é‚»
     /// </summary>
-    /// <param name="otherCell">ÁíÒ»¸öCell</param>
-    /// <returns>ÊÇ·ñÏàÁÚ</returns>
+    /// <param name="otherCell">å¦ä¸€ä¸ªCell</param>
+    /// <returns>æ˜¯å¦ç›¸é‚»</returns>
     public bool GetIsNeighbourWith(HexCell otherCell)
     {
         return GetDirectionToNeighbourCell(otherCell) != null;
     }
 
     /// <summary>
-    /// ¼ì²é²¢°ó¶¨ÓëËùÓĞÒÑÕ¼ÓÃÁÚ¾ÓHexCellµÄ±ß½çÁ¬½Ó
-    /// µ±HexCell±»Ìí¼Óµ½RealmÊ±µ÷ÓÃ´Ë·½·¨
+    /// æ£€æŸ¥å¹¶ç»‘å®šä¸æ‰€æœ‰å·²å ç”¨é‚»å±…HexCellçš„è¾¹ç•Œè¿æ¥
+    /// å½“HexCellè¢«æ·»åŠ åˆ°Realmæ—¶è°ƒç”¨æ­¤æ–¹æ³•
     /// </summary>
     public void CheckAndBindEdgesWithOccupiedNeighbours()
     {
@@ -299,39 +345,110 @@ public class HexCell : MonoBehaviour, IController
                 HexDirection? direction = GetDirectionToNeighbourCell(neighbour);
                 if (direction.HasValue)
                 {
-                    // Í¬²½¸üĞÂ°ó¶¨ÁÚ¾ÓµÄĞÅÏ¢
+                    // åŒæ­¥æ›´æ–°ç»‘å®šé‚»å±…çš„ä¿¡æ¯
                     HexDirection oppositeDirection = HexMetrics.GetOppositeDirection(direction.Value);
                     int edgeIndex = (int)direction.Value;
                     int oppositeEdgeIndex = (int)oppositeDirection;
                     edges[edgeIndex].SetEdgeConnected(neighbour.edges[oppositeEdgeIndex], neighbour);
 
-                    //Debug.Log($"°ó¶¨ÁË Cell({coord.x},{coord.y}) Cell({neighbour.coord.x},{neighbour.coord.y}) µÄ±ß½ç");
+                    //Debug.Log($"ç»‘å®šäº† Cell({coord.x},{coord.y}) Cell({neighbour.coord.x},{neighbour.coord.y}) çš„è¾¹ç•Œ");
                 }
             }
         }
     }
 
     /// <summary>
-    /// »ñÈ¡Ö¸¶¨·½ÏòÉÏµÄÁÚ¾ÓHexCell£¨Èç¹û´æÔÚ£©
+    /// è·å–æŒ‡å®šæ–¹å‘ä¸Šçš„é‚»å±…HexCellï¼ˆå¦‚æœå­˜åœ¨ï¼‰
     /// </summary>
-    /// <param name="direction">²éÕÒ·½Ïò</param>
-    /// <returns>ÁÚ¾ÓHexCell£¬Èç¹û²»´æÔÚ·µ»Ønull</returns>
+    /// <param name="direction">æŸ¥æ‰¾æ–¹å‘</param>
+    /// <returns>é‚»å±…HexCellï¼Œå¦‚æœä¸å­˜åœ¨è¿”å›null</returns>
     public HexCell GetNeighborInDirection(HexDirection direction)
     {
-        // ¼ÆËãÁÚ¾Ó×ø±ê
+        // è®¡ç®—é‚»å±…åæ ‡
         Pos2D neighborCoord = HexMetrics.GetHexCellCoordByDirection(coord, direction);
 
-        // ´ÓHexGridÖĞ²éÕÒÁÚ¾Ó
+        // ä»HexGridä¸­æŸ¥æ‰¾é‚»å±…
         return mapModel.HexGrid.GetCellByCoord(neighborCoord);
     }
 
     /// <summary>
-    /// ¼ì²é¶ÔÓ¦·½ÏòµÄ±ß½çÊÇ·ñÓ¦¸Ã°ó¶¨£¨ÁÚ¾Ó´æÔÚÇÒÒÑ±»ÄÉÈëÁìÓò£©
+    /// æ£€æŸ¥å¯¹åº”æ–¹å‘çš„è¾¹ç•Œæ˜¯å¦åº”è¯¥ç»‘å®šï¼ˆé‚»å±…å­˜åœ¨ä¸”å·²è¢«çº³å…¥é¢†åŸŸï¼‰
     /// </summary>
     public bool ShouldBindEdgeInDirection(HexDirection direction)
     {
         HexCell neighbor = GetNeighborInDirection(direction);
         return neighbor != null && neighbor.isOccupied;
+    }
+    public void SealRoadEdges()
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            if (edges[i]?.GetIsRoad() == true)
+            {
+                edges[i].ShowBattleObstacles();
+            }
+        }
+    }
+
+    /// <summary>
+    /// å¼€æ”¾Roadè¾¹
+    /// </summary>
+    public void OpenRoadEdges()
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            if (edges[i]?.GetIsRoad() == true)
+            {
+                edges[i].HideBattleObstacles();
+            }
+        }
+    }
+
+
+    #endregion
+
+    #region ç‰©ä½“æ‘†æ”¾é€»è¾‘ç›¸å…³
+
+    /// <summary>
+    /// è·å–EntityGroupçš„ç”Ÿæˆä½ç½®ï¼Œæ ¹æ®é“è·¯æƒ…å†µç¡®å®šåœ¨è¾¹è¿˜æ˜¯è§’ç”Ÿæˆ
+    /// è¿”å›Vector3Intï¼Œå‡å°è¯¯å·®
+    /// </summary>
+    /// <summary>
+    /// è·å–EntityGroupçš„ç”Ÿæˆä½ç½®ï¼Œæ ¹æ®é“è·¯æƒ…å†µç¡®å®šåœ¨è¾¹è¿˜æ˜¯è§’ç”Ÿæˆ
+    /// è¿”å›Vector3Intï¼Œå‡å°è¯¯å·®
+    /// </summary>
+    public void GetEntityGroupXZPositions(HashSet<Vector3Int> entityPositions)
+    {
+        for (int i = 0; i < 6; i++) // éå†6ä¸ªæ–¹å‘
+        {
+            HexDirection direction = (HexDirection)i;
+            HexCellEdge edge = edges[i];
+
+            if (edge.GetIsRoad())
+            {
+                // å¦‚æœæ˜¯é“è·¯ï¼Œåœ¨è¯¥è¾¹å¯¹åº”çš„ä¸¤ä¸ªè§’ä¸Šç”Ÿæˆ
+                int cornerIndex1 = i * 2 + 1;
+                int cornerIndex2 = (i * 2 + 3) % 12;
+
+                Vector3 cornerPos1 = GetEdgePointByIndex(cornerIndex1);
+                Vector3 cornerPos2 = GetEdgePointByIndex(cornerIndex2);
+
+                Vector3Int intPos1 = cornerPos1.ToVector3Int();
+                Vector3Int intPos2 = cornerPos2.ToVector3Int();
+
+                entityPositions.Add(intPos1);
+                entityPositions.Add(intPos2);
+            }
+            else
+            {
+                // å¦‚æœä¸æ˜¯é“è·¯ï¼Œåœ¨è¾¹çš„ä¸­å¿ƒç”Ÿæˆ
+                int edgeIndex = i * 2;
+                Vector3 edgePos = GetEdgePointByIndex(edgeIndex);
+
+                Vector3Int intPos = edgePos.ToVector3Int();
+                entityPositions.Add(intPos);
+            }
+        }
     }
 
     #endregion

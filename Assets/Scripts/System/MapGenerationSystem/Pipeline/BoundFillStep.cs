@@ -1,7 +1,6 @@
 using QFramework;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 /// <summary>
@@ -9,13 +8,17 @@ using UnityEngine;
 /// </summary>
 public class BoundFillStep : IMapGenerationStep
 {
+    private MapModel mapModel;
     private HexGrid hexGrid;
     private Storage storage;
     private EdgeFillConfig fillConfig;
+    
     private GameObject obstacleGroup;
+    private GameObject roadObstacleGroup;
 
     public void Execute(MapModel mapModel)
     {
+        this.mapModel = mapModel;
         hexGrid = mapModel.HexGrid;
         storage = mapModel.GetUtility<Storage>();
 
@@ -24,10 +27,10 @@ public class BoundFillStep : IMapGenerationStep
 
         // 创建障碍物组
         CreateObstacleGroup();
+        CreateRoadObstacleGroup();
 
         // 设置HexCellEdge的静态配置
         SetEdgeFillStaticConfig();
-
         // 为每个已占用的HexCell填充边界障碍物
         foreach (HexCell cell in hexGrid.allHexCellCoordDict.Values)
         {
@@ -53,6 +56,19 @@ public class BoundFillStep : IMapGenerationStep
     }
 
     /// <summary>
+    /// 创建Road障碍物专用组（默认隐藏）
+    /// </summary>
+    private void CreateRoadObstacleGroup()
+    {
+        roadObstacleGroup = GameObject.Find("RoadObstacles");
+        if (roadObstacleGroup == null)
+        {
+            roadObstacleGroup = new GameObject("RoadObstacles");
+            roadObstacleGroup.transform.position = Vector3.zero;
+        }
+    }
+
+    /// <summary>
     /// 设置HexCellEdge的静态配置（通过反射或公共方法）
     /// </summary>
     private void SetEdgeFillStaticConfig()
@@ -73,10 +89,16 @@ public class BoundFillStep : IMapGenerationStep
             HexCellEdge edge = cell.edges[i];
             if (edge != null)
             {
-                // 填充边界障碍物
-                FillEdgeObstacles(edge);
-
-                // edge.FillDecorations();
+                if (edge.GetIsRoad())
+                {
+                    // Road边，会关闭
+                    FillRoadEdgeObstacles(edge);
+                }
+                else if(!(edge.GetIsFilled() || edge.GetIsRoad()))
+                {
+                    // 普通边，静态
+                    FillEdgeObstacles(edge);
+                }
             }
         }
     }
@@ -114,14 +136,49 @@ public class BoundFillStep : IMapGenerationStep
         }
     }
 
+    /// <summary>
+    /// 为Road边填充障碍物（到专用组）
+    /// </summary>
+    private void FillRoadEdgeObstacles(HexCellEdge edge)
+    {
+        if (edge.GetIsFilled()) return; // 避免重复填充
+
+        // 为这条Road边创建独立容器
+        string containerName = $"RoadEdge_Cell({edge.ownerCell.coord.x},{edge.ownerCell.coord.y})_Dir{edge.direction}";
+        GameObject edgeContainer = new GameObject(containerName);
+        edgeContainer.transform.SetParent(roadObstacleGroup.transform);
+
+        // 输出到edgeContainer
+        var (startPoint, endPoint) = edge.GetEdgePoints();
+        Vector3 edgeVector = endPoint - startPoint;
+        float edgeLength = edgeVector.magnitude;
+        Material fillMaterial = edge.GetFillMaterial();
+
+        FillAroundEdgeWithObstacles(startPoint, edgeVector, edgeLength, fillMaterial, edgeContainer);
+
+        // 让Edge记住自己的障碍物容器
+        edge.BindBattleObstacleContainer(edgeContainer);
+        edgeContainer.SetActive(false);
+        edge.SetIsFilled(true);
+
+        // 同步填充共享边
+        if (edge.IsConnected && edge.edgeConnected != null)
+        {
+            edge.edgeConnected.SetIsFilled(true);
+            edge.edgeConnected.BindBattleObstacleContainer(edgeContainer);
+        }
+    }
+
+
 
     /// <summary>
     /// 使用受限随机填充算法填充障碍物
     /// </summary>
-    private void FillAroundEdgeWithObstacles(Vector3 startPoint, Vector3 edgeVector, float edgeLength, Material material)
+    private void FillAroundEdgeWithObstacles(Vector3 startPoint, Vector3 edgeVector, float edgeLength, Material material, GameObject parentContainer = null)
     {
-        GameObject[] obstacleModels = GetEdgeObstacleModels();
+        GameObject targetParent = parentContainer ?? obstacleGroup;
 
+        GameObject[] obstacleModels = GetEdgeObstacleModels();
         Vector3 currentPosition = startPoint;
         Vector3 edgeDirection = edgeVector.normalized;
         float remainDistance = edgeLength;
@@ -205,9 +262,10 @@ public class BoundFillStep : IMapGenerationStep
 
             // 7.创建障碍物实例
             GameObject obstacleInstance = Object.Instantiate(selectedObstacle, obstaclePosition, obstacleRotation);
-            obstacleInstance.transform.SetParent(obstacleGroup.transform);
+            obstacleInstance.transform.SetParent(targetParent.transform);
 
             Vector3 scale = obstacleInstance.transform.localScale;
+
 
             // 根据是否旋转了90度来决定拉伸哪个轴
             if (needRotate90)

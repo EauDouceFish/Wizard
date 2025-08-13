@@ -32,7 +32,7 @@ namespace PlayerSystem
         /// 最多可支持连续冲刺的次数
         /// </summary>
         [field: SerializeField]
-        [field: Range(1f, 10f)]
+        [field: Range(0f, 10f)]
         public float ConsecutiveDashesLimitAmount { get; private set; } = 1f;
 
         /// <summary>

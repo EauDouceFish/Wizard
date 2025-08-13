@@ -87,6 +87,10 @@ public static class GOExtensions
     public static Bounds GetModelBoundsAABB(this GameObject gameObject)
     {
         MeshRenderer renderer = gameObject.GetComponent<MeshRenderer>();
+        if (renderer == null)
+        {
+            renderer = gameObject.GetComponentInChildren<MeshRenderer>();
+        }
         if (renderer != null)
         {
             return renderer.bounds;
@@ -103,23 +107,61 @@ public static class GOExtensions
     /// </summary>
     public static Vector3 GetGroundPosition(Vector3 targetXZ)
     {
-        // 从上方发射射线找到Ground表面
-        float startHeight = targetXZ.y + 20f;
+        // 从上方发射射线找到Ground表面  
+        float startHeight = targetXZ.y + 30f;
         Vector3 startPosition = new Vector3(targetXZ.x, startHeight, targetXZ.z);
 
         Ray ray = new Ray(startPosition, Vector3.down);
-        RaycastHit[] hits = Physics.RaycastAll(ray, 50f);
+        int groundLayer = LayerMask.GetMask("Ground");
 
-        foreach (RaycastHit hit in hits)
+        if (Physics.Raycast(ray, out RaycastHit hit, 50f, groundLayer))
         {
-            if (hit.collider.CompareTag("Ground"))
-            {
-                return hit.point;
-            }
+            return hit.point;
         }
 
-        // 如果没有找到Ground，返回原始位置（可能需要调整）
+        // 如果没有找到Ground，返回原始位置（可能需要调整）  
         return targetXZ;
     }
 
+
+    /// <summary>
+    /// 获取点击位置的方便方法
+    /// </summary>
+    /// <returns></returns>
+    public static Vector3 GetMouseWorldPosition()
+    {
+        Camera mainCamera = Camera.main;
+        if (mainCamera == null) return Vector3.zero;
+
+        Vector2 mousePosition = Input.mousePosition;
+        Ray ray = mainCamera.ScreenPointToRay(mousePosition);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
+        {
+            return hit.point;
+        }
+
+        return Vector3.zero;
+    }
+
+    /// <summary>
+    /// 获取点击位置的方便方法，仅限点击Layer为Ground的对象
+    /// </summary>
+    /// <returns></returns>
+    public static Vector3 GetMouseWorldPositionOnGround()
+    {
+        Camera mainCamera = Camera.main;
+        if (mainCamera == null) return Vector3.zero;
+
+        Vector2 mousePosition = Input.mousePosition;
+        Ray ray = mainCamera.ScreenPointToRay(mousePosition);
+
+        int groundLayer = LayerMask.GetMask("Ground");
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundLayer))
+        {
+            return hit.point;
+        }
+
+        return Vector3.zero;
+    }
 }

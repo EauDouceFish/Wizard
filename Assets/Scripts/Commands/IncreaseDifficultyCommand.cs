@@ -15,7 +15,16 @@ public class IncreaseDifficultyCommand : AbstractCommand
     protected override void OnExecute()
     {
         GameCoreModel gameModel = this.GetModel<GameCoreModel>();
-        int newLevel = gameModel.DifficultyLevel + levelToIncrease;
-        gameModel.SetDifficulty(newLevel);
+
+        if (gameModel.isElementGetted == false)
+        {
+            gameModel.isElementGetted = true;
+        }
+        else
+        {
+            int newLevel = gameModel.DifficultyLevel.Value + levelToIncrease;
+            gameModel.SetDifficulty(newLevel);
+        }
+
     }
 }

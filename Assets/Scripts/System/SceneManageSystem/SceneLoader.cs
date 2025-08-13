@@ -1,7 +1,7 @@
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// 如果需要用到LoadingScene，可以使用SceneLoader【待定】
+/// 如果需要用到LoadingScene，可以使用SceneLoader【待定，目前遗弃】
 /// </summary>
 public static class SceneLoader
 {
@@ -14,7 +14,7 @@ public static class SceneLoader
     public static void LoadScene(GameScene target)
     {
         TargetScene = target;
-        SceneManager.LoadScene(GameScene.LoadingScene.ToString());
+        SceneManager.LoadScene(target.ToString());
     }
 
     public static string GetSceneName(GameScene name)
@@ -22,8 +22,8 @@ public static class SceneLoader
         return name.ToString();
     }
 
-    public static void LoaderCallback()
-    {
-        SceneManager.LoadScene(TargetScene.ToString());
-    }
+    //public static void LoaderCallback()
+    //{
+    //    SceneManager.LoadScene(TargetScene.ToString());
+    //}
 }

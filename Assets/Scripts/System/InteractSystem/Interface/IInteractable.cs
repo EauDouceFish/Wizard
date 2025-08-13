@@ -2,6 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// 要交互的物体要实现此接口，实现ColliderTrigger相关逻辑并且传入
+/// 通常使用IInteractableEntity继承此接口
 /// </summary>
 public interface IInteractable
 {
@@ -17,5 +18,5 @@ public interface IInteractable
     /// </summary>
     string InteractReactionText { get; }
     bool CanInteract { get; }
-    void OnInteract(GameObject player);
+    public void OnInteract(GameObject player);
 }

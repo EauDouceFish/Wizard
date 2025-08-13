@@ -1,13 +1,14 @@
+using QFramework;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using QFramework;
-using System;
+using UnityEngine.Rendering.VirtualTexturing;
 
 /// <summary>
 /// 生成六边形网格地图的控制器
 /// </summary>
-public class MapGenerationController : MonoBehaviour, IController
+public class MapGenerationController : MonoBehaviour, IController, ICanSendCommand
 {
     [SerializeField] HexMetricsConfigData hexMetricsConfigData;
     [SerializeField] MapConfigData mapConfigData; //这个数据只是参考，运行时从MapModel读取。Model的赋值此前完成

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a35ce90c89092594c96bf88ad15b803e, type: 3}
+  m_Name: AudioSourceRefsSO
+  m_EditorClassIdentifier: 
+  musicMainMenu: {fileID: 8300000, guid: 73c71ba60a105454bb464778c94408df, type: 3}
+  musicNatureRegion: {fileID: 8300000, guid: 412b41fccab5d664aa2260c2f83d49f6, type: 3}
+  musicDesertRegion: {fileID: 8300000, guid: 292e8b489702e3a43a43b1da4c9a836a, type: 3}
+  musicBarrenRegion: {fileID: 8300000, guid: 4c29dcf6fc1e38f45bbbd611df78f743, type: 3}
+  musicForstRegion: {fileID: 8300000, guid: 61438b7438a80514f8a35fb00eba7dce, type: 3}
+  musicVolcanoRegion: {fileID: 8300000, guid: 21d34b9aa5d0f8e42814400a8c494a23, type: 3}
+  musicBoss: {fileID: 8300000, guid: 0b0a8df348a326143abd20c9d9fbe842, type: 3}
+  bubbleSounds:
+  - {fileID: 8300000, guid: 070abf84863182c43bf67eef7f2b3ac6, type: 3}
+  elementPillarSounds:
+  - {fileID: 8300000, guid: cef534e8b6c712a4faffbd3059d81c18, type: 3}
+  enemyDefeatedSounds: []
+  buttonClickSounds: []
+  errorSounds: []

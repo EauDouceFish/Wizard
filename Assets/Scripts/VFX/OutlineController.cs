@@ -1,24 +1,48 @@
 using QFramework;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
 /// OutlineController通常在交互时自动设置挂载
 /// </summary>
-[RequireComponent(typeof(Renderer))]
 public class OutlineController : MonoBehaviour, IController
 {
     private static readonly int s_ShaderProp_OutlineColor = Shader.PropertyToID("_OutlineColor");
     [SerializeField] private Material outlineMaterial;
     [SerializeField] [ColorUsage(true, true)] private Color outlineColor;
+    [SerializeField] private bool includeChildren = true; // 描边是否包含子物体
+
     private OutlineSystem outlineSystem;
-    private Renderer gameObjectRenderer;
+    private List<Renderer> allRenderers = new List<Renderer>();
+    //private Renderer gameObjectRenderer;
 
     private void Awake()
     {
         outlineSystem = this.GetSystem<OutlineSystem>();
-        gameObjectRenderer = GetComponent<Renderer>();
+        CollectRenderers();
         SetOutlineMaterial();
+    }
+
+    private void CollectRenderers()
+    {
+        allRenderers.Clear();
+
+        if (includeChildren)
+        {
+            // 获取自身和所有子物体的Renderer
+            Renderer[] renderers = GetComponentsInChildren<Renderer>();
+            allRenderers.AddRange(renderers);
+        }
+        else
+        {
+            // 只获取自身的Renderer
+            Renderer renderer = GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                allRenderers.Add(renderer);
+            }
+        }
     }
 
     public void SetOutlineMaterial()
@@ -28,14 +52,20 @@ public class OutlineController : MonoBehaviour, IController
 
     public void SetOutlineEnabled(bool outlineEnabled)
     {
-        if (outlineEnabled)
+        if(allRenderers.Count == 0) return;
+        foreach (var renderer in allRenderers)
         {
-            // 第二位补上1
-            gameObjectRenderer.renderingLayerMask |= 1 << 1;
-        }
-        else
-        {
-            gameObjectRenderer.renderingLayerMask &= ~((uint)1 << 1);
+            if (renderer == null) continue;
+
+            if (outlineEnabled)
+            {
+                // 在第二位设置1
+                renderer.renderingLayerMask |= 1 << 1;
+            }
+            else
+            {
+                renderer.renderingLayerMask &= ~((uint)1 << 1);
+            }
         }
     }
 

@@ -14,7 +14,7 @@ public class OutlineSystem : AbstractSystem, IOutlineSystem
     protected override void OnInit()
     {
         storage = this.GetUtility<Storage>();
-        outlineMaterial = storage.LoadOutlineMaterial();
+        outlineMaterial = storage.GetOutlineMaterial();
         // 后续可以拉入luban导表系统去单独设置每个Color，在这里可以初始化ItemColor或者区域Color，现在先不管暂时统一了
     }
 

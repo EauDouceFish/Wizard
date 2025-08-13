@@ -10,6 +10,8 @@ namespace PlayerSystem
         public Vector2 MovementInput { get; set; }
         public float MovementSpeedModifier { get; set; } = 1.0f;
 
+        public float MovementSpeedBuffMultiplier { get; set; } = 1.0f;
+
         // 斜坡时候会略微减速
         public float MovementOnSlopesSpeedModifier { get; set; } = 1.0f;
 
@@ -20,12 +22,21 @@ namespace PlayerSystem
         public bool ShouldWalk { get; set; }
 
         // 点击移动相关
-        public Vector3 ClickTargetPosition { get; set; }
-        public float ClickTargetReachDistance { get; set; } = 0.5f;
+        public Vector3 RightClickTargetPosition { get; set; }
+        public float ClickTargetReachDistance { get; set; } = 0.5f;//会在这个距离的时候停下
         public bool HasClickTarget { get; set; }
         
         // 状态切换控制
         public bool ShouldSwitchToCombat { get; set; }
+
+        // 施法相关
+        public bool IsChanneling { get; set; }
+        public bool IsInstantCast { get; set; }
+
+        // 施法目标位置
+        public Vector3 CastTargetPosition { get; set; }
+        public BasicSpellInstance CurrentChannelSpell { get; set; }
+
 
         // 当前玩家希望的朝向
         private Vector3 currentTargetRotation;

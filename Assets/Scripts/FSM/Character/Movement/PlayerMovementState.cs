@@ -25,7 +25,7 @@ namespace PlayerSystem
         /// </summary>
         public virtual void Enter()
         {
-            Debug.Log("State: " + GetType().Name);
+            //Debug.Log("State: " + GetType().Name);
 
             AddInputActionsCallbacks();
             // StartAnimation
@@ -187,7 +187,7 @@ namespace PlayerSystem
         /// <returns></returns>
         protected float GetMovementSpeed(bool shouldConsiderSlopes = true)
         {
-            float movementSpeed = movementData.BaseSpeed * stateMachine.ReusableData.MovementSpeedModifier;
+            float movementSpeed = movementData.BaseSpeed * stateMachine.ReusableData.MovementSpeedModifier * stateMachine.ReusableData.MovementSpeedBuffMultiplier;
 
             if (shouldConsiderSlopes)
             {
@@ -228,12 +228,10 @@ namespace PlayerSystem
 
         }
 
-        // 更新希望的朝向
         protected float UpdateTargetRotation(Vector3 direction, bool shouldConsiderCameraRotation = true)
         {
             float directionAngle = GetDirectionAngle(direction);
 
-            // 发现当前玩家希望的朝向更新了
             if (directionAngle != stateMachine.ReusableData.CurrentTargetRotation.y)
             {
                 UpdateTargetRotationData(directionAngle);
@@ -242,13 +240,11 @@ namespace PlayerSystem
             return directionAngle;
         }
 
-        // 获得希望的朝向
         protected Vector3 GetTargetRotationDirection(float targetAngle)
         {
             return Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
         }
 
-        // 相机旋转，更新玩家希望的朝向，同时重置已旋转过的时间（重新旋转）
         private void UpdateTargetRotationData(float targetAngle)
         {
             stateMachine.ReusableData.CurrentTargetRotation.y = targetAngle;
@@ -256,7 +252,6 @@ namespace PlayerSystem
             stateMachine.ReusableData.DampedTargetRotationPassedTime.y = 0.0f;
         }
 
-        // 瞬时改变速率让玩家静止
         protected void ResetVelocity()
         {
             stateMachine.Player.Rigidbody.velocity = Vector3.zero;
@@ -337,7 +332,7 @@ namespace PlayerSystem
         // 获得点击位置，和玩家连线目标向量，在XZ平面投影的单位向量（纯方向）
         private Vector3 GetClickMoveDirectionXZ()
         {
-            Vector3 targetPosition = stateMachine.ReusableData.ClickTargetPosition;
+            Vector3 targetPosition = stateMachine.ReusableData.RightClickTargetPosition;
             Vector3 currentPosition = stateMachine.GetPlayerPosition();
 
             Vector3 direction = (targetPosition - currentPosition).normalized;

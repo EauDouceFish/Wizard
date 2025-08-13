@@ -9,12 +9,14 @@ public class InteractionSystem : AbstractSystem, IInteractionSystem
     private List<IInteractable> allInteractableObjectsInRange = new();
     private IInteractable currentInteractingObject;
     private GameObject player;
+    private OutlineSystem outlineSystem;
 
     protected override void OnInit()
     {
         this.RegisterEvent<PlayerEnterInteractAreaEvent>(OnPlayerEnterInteractArea);
         this.RegisterEvent<PlayerExitInteractAreaEvent>(OnPlayerExitInteractArea);
         this.RegisterEvent<PlayerInteractEvent>(OnPlayerInteract);
+        outlineSystem = this.GetSystem<OutlineSystem>();
     }
 
     public void RegisterInteractable(IInteractable interactable)
@@ -128,7 +130,10 @@ public class InteractionSystem : AbstractSystem, IInteractionSystem
         // 隐藏上一个物体的轮廓
         if (currentInteractingObject != null)
         {
-            this.GetSystem<OutlineSystem>().HideOutline(currentInteractingObject.GameObject);
+            if (outlineSystem != null)
+            {
+                outlineSystem.HideOutline(currentInteractingObject.GameObject);
+            }
         }
 
         currentInteractingObject = target;
@@ -136,7 +141,10 @@ public class InteractionSystem : AbstractSystem, IInteractionSystem
         // 显示新的轮廓
         if (currentInteractingObject != null && currentInteractingObject.CanInteract)
         {
-            this.GetSystem<OutlineSystem>().ShowOutline(currentInteractingObject.GameObject);
+            if (outlineSystem != null)
+            {
+                outlineSystem.ShowOutline(currentInteractingObject.GameObject);
+            }
         }
     }
 }

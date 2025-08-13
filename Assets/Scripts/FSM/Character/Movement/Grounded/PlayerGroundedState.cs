@@ -47,7 +47,7 @@ public class PlayerGroundedState : PlayerMovementState
     #region Main Methods
 
     // 让玩家不会被小坡卡住
-    private void FloatCapsule()
+    protected void FloatCapsule()
     {
         Vector3 capsuleColliderCenterInWorldSpace =
             stateMachine.Player.ColliderUtility.CapsuleColliderData.Collider.bounds.center;
@@ -159,7 +159,7 @@ public class PlayerGroundedState : PlayerMovementState
 
     protected virtual void OnDashStarted(InputAction.CallbackContext context)
     {
-        stateMachine.ChangeState(stateMachine.DashingState);
+        //stateMachine.ChangeState(stateMachine.DashingState);
     }
 
     #endregion

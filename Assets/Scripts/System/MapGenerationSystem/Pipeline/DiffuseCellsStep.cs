@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using QFramework;
@@ -29,12 +28,14 @@ public class DiffuseCellsStep : IMapGenerationStep
         }
 
         int averageHexCellNum;
+
+        // 这部分后续可通过限制起始HexCell位置来优化，避免死循环
         int whileCount = 0; // 避免死循环修正，避免在没有规定限制起始HexCell位置下，某些HexCell被360度包围，导致无法扩散
         while (currentHexCellSum < mapNeedingCellNum)
         {
             if (whileCount > 1000)
             {
-                Debug.LogWarning("错误的地图，某些Cell由于随机无受限，导致无法按照规则生成");
+                //Debug.LogWarning("错误的地图，某些Cell由于随机无受限，导致无法按照规则生成");
                 break;
             }
             // 计算HexRealm拥有HexCell数量的平均值，如果当前领域的数量在平均值之下，就将其尝试扩散
@@ -60,7 +61,7 @@ public class DiffuseCellsStep : IMapGenerationStep
 
         for (int i = 0; i < num; i++)
         {
-            HashSet<HexCell> candidateSet = new HashSet<HexCell>();
+            HashSet<HexCell> candidateSet = new();
             Dictionary<HexCell, HexCell> expansionMapping = new Dictionary<HexCell, HexCell>();
 
             foreach (HexCell cell in allHexCells)
@@ -81,8 +82,8 @@ public class DiffuseCellsStep : IMapGenerationStep
             if (candidateSet.Count == 0) return availableCellsFound;
 
             // 随机选择一个地块进行拓展
-            List<HexCell> availableCellsList = new List<HexCell>(candidateSet);
-            int randomHexCellIdx = UnityEngine.Random.Range(0, availableCellsList.Count);
+            List<HexCell> availableCellsList = new(candidateSet);
+            int randomHexCellIdx = Random.Range(0, availableCellsList.Count);
             HexCell newCell = availableCellsList[randomHexCellIdx];
 
             // 获取这个新拓展的地块是由哪个旧地块扩展的、设置为路
@@ -92,6 +93,7 @@ public class DiffuseCellsStep : IMapGenerationStep
 
             // 加入领域
             hexRealm.AddHexCellIntoRealm(newCell);
+
             availableCellsFound++;
         }
 

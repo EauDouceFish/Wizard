@@ -59,7 +59,7 @@ public static class BuffDataManager
         result = Resources.Load<BuffData>(path);
         if (result == null)
         {
-            throw new Exception($"加载BuffData失败，加载路径：{path}");
+            throw new Exception($"加载BuffData[{name}]失败，加载路径：{path}");
         }
         return result;
     }

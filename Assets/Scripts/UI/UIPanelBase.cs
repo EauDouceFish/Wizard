@@ -5,22 +5,22 @@ using UnityEngine;
 public abstract class UIPanelBase : MonoBehaviour, IController
 {
     /// <summary>
-    /// 大部分UI在Awake时隐藏
+    /// Start时隐藏
     /// </summary>
-    [SerializeField] protected bool hideOnAwake = true;
+    [SerializeField] protected bool hideOnStart = false;
 
     protected virtual void Awake()
     {
-        if (hideOnAwake)
+
+    }
+
+    protected virtual void Start()
+    {
+        if (hideOnStart)
         {
             gameObject.SetActive(false);
         }
     }
-
-    /// <summary>
-    /// 面板初始化
-    /// </summary>
-    public virtual void OnPanelInit() { }
 
     /// <summary>
     /// 面板显示时调用

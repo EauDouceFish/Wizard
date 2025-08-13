@@ -603,15 +603,6 @@ namespace QFramework
         public static IUnRegister UnRegisterWhenCurrentSceneUnloaded(this IUnRegister self) =>
             UnRegisterCurrentSceneUnloadedTrigger.Get.AddUnRegister(self);
 #endif
-
-
-#if GODOT
-		public static IUnRegister UnRegisterWhenNodeExitTree(this IUnRegister unRegister, Godot.Node node)
-		{
-			node.TreeExiting += unRegister.UnRegister;
-			return unRegister;
-		}
-#endif
     }
 
     public class TypeEventSystem

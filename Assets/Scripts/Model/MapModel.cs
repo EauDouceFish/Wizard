@@ -15,6 +15,7 @@ public class MapModel : AbstractModel
     public int BiomeCount => biomes.Count;                               // 实际群系数量
     public float HexOuterRadius { get; private set; }                    // 地图使用的六边形外切圆半径（边长）
     public float HexInnerRadius => HexOuterRadius * 0.866025404f;        // 地图使用的六边形内接圆半径
+    public float ScaleParam => HexOuterRadius / 40.0f;                  // 地图缩放参数，地形模型缩放使用
 
     // 当前地图大小类型
     public MapSize CurrentMapSize { get; private set; }
@@ -25,12 +26,22 @@ public class MapModel : AbstractModel
     // 地图所需要的群系配置数据
     public List<BiomeSO> BiomeConfigData { get; private set; } = new List<BiomeSO>();
 
+    // 双端队列，便于存储主路径且可以在前后操作
+    public List<HexCell> MainPath { get; private set; } = new List<HexCell>();
 
     // 当前地图的生成器，网格地图
     public HexGrid HexGrid { get; private set; }
 
     protected override void OnInit()
     {
+        if (MapConfigurationManager.HasValidMapSize())
+        {
+            CurrentMapSize = MapConfigurationManager.GetSelectedMapSize();
+        }
+        else
+        {
+            CurrentMapSize = MapSize.Default;
+        }
     }
 
     /// <summary>
@@ -61,6 +72,7 @@ public class MapModel : AbstractModel
     public void SetCurrentMapSize(MapSize mapSize)
     {
         CurrentMapSize = mapSize;
+        MapConfigurationManager.SetSelectedMapSize(mapSize);
     }
 
     public void SetMapTargetBiomeCount(int count)

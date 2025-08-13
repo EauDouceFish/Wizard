@@ -15,7 +15,7 @@ public class DecreaseDifficultyCommand : AbstractCommand
     protected override void OnExecute()
     {
         GameCoreModel model = this.GetModel<GameCoreModel>();
-        int newLevel = model.DifficultyLevel - levelToDecrease;
+        int newLevel = model.DifficultyLevel.Value - levelToDecrease;
         model.SetDifficulty(newLevel);
     }
 }

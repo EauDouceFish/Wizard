@@ -1,7 +1,13 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Pool;
-using System;
+
+/// <summary>
+/// BuffSystem，需要实现自己的维护、初始化、Update与FixedUpdate
+/// </summary>
+/// <typeparam name="Owner"></typeparam>
 public class BuffSystem<Owner>
 {
     #region 构造函数
@@ -20,16 +26,21 @@ public class BuffSystem<Owner>
     private readonly List<BuffBase<Owner>> m_Buffs = new List<BuffBase<Owner>>(10);
     private readonly List<string> m_BuffsPoolName = new List<string>(10);
 
+    public IHasStatusUI StatusUIOwner
+    {
+        get => statusUIOwner;
+        set => statusUIOwner = value;
+    }
+    private IHasStatusUI statusUIOwner;
+
     #region 外部可用方法
 
     /// <summary>
-    /// 添加一个buff
+    /// 添加一个buff、提供类型、提供者、添加多少层
     /// </summary>
-    /// <typeparam name="BuffType">buff类型</typeparam>
-    /// <param name="provider">buff提供者</param>
-    /// <param name="heap">添加多少层?</param>
     public void AddBuff<BuffType>(string provider, int heap = 1) where BuffType : BuffBase<Owner>, new()
     {
+        Debug.Log($"AddBuff: {typeof(BuffType).Name} 已添加到 {m_Owner}");
         //如果身上没有任何buff则直接挂一个新buff即可
         if (m_Buffs.Count == 0)
         {
@@ -106,20 +117,15 @@ public class BuffSystem<Owner>
     }
 
     /// <summary>
-    /// 移除指定buff
-    /// 如果此buff不存在则返回false
+    /// 移除指定buff，如果此buff不存在则返回false
     /// </summary>
-    /// <param name="buff">要移除的buff</param>
-    /// <returns></returns>
     public bool RemoveBuff(BuffBase<Owner> buff)
     {
-        //先找到索引
         int index = IndexOf(buff);
         if (index < 0)
         {
             return false;
         }
-        //然后移除他！
         RemoveAt(index);
         return true;
     }
@@ -128,20 +134,15 @@ public class BuffSystem<Owner>
     /// 按条件移除一个buff
     /// 如果此buff不存在则返回false
     /// </summary>
-    /// <typeparam name="BuffType">要移除的buff的类型</typeparam>
-    /// <param name="provider">要移除的buff的提供者</param>
-    /// <returns></returns>
     public bool RemoveBuff<BuffType>(string provider) where BuffType : BuffBase<Owner>, new()
     {
-        //找到符号条件的buff
+        //找到符号条件的buff，获取索引然后移除
         BuffType result = FindBuff<BuffType>(provider);
         if (result == null)
         {
             return false;
         }
-        //获取它的索引
         int index = IndexOf(result);
-        //移除他
         RemoveAt(index);
         return true;
 
@@ -149,9 +150,6 @@ public class BuffSystem<Owner>
     /// <summary>
     /// 查找一个buff，如果没找到返回null
     /// </summary>
-    /// <typeparam name="BuffType"></typeparam>
-    /// <param name="provider"></param>
-    /// <returns></returns>
     public BuffType FindBuff<BuffType>(string provider) where BuffType : BuffBase<Owner>
     {
         BuffType result = null;
@@ -168,10 +166,44 @@ public class BuffSystem<Owner>
 
         return result;
     }
+
+
+    /// <summary>
+    /// 找到第一个BuffType。（游戏内基本为覆盖，不存在两个名字的）
+    /// </summary>
+    /// <typeparam name="BuffType"></typeparam>
+    /// <returns></returns>
+    public BuffType FindBuff<BuffType>() where BuffType : BuffBase<Owner>
+    {
+        foreach (BuffBase<Owner> item in m_Buffs)
+        {
+            if (item is BuffType)
+            {
+                return item as BuffType;
+            }
+        }
+        return null;
+    }
+    /// <summary>
+    /// 移除第一个BuffType。（游戏内基本为覆盖，不存在两个名字的）
+    /// </summary>
+    /// <typeparam name="BuffType"></typeparam>
+    /// <returns></returns>
+    public bool RemoveBuff<BuffType>() where BuffType : BuffBase<Owner>
+    {
+        BuffType result = FindBuff<BuffType>();
+        if (result == null)
+        {
+            return false;
+        }
+        int index = IndexOf(result);
+        RemoveAt(index);
+        return true;
+    }
+
     /// <summary>
     /// 返回当前拥有的所有buff。
     /// </summary>
-    /// <returns></returns>
     public List<BuffBase<Owner>> FindAllBuff()
     {
         return m_Buffs;
@@ -184,6 +216,7 @@ public class BuffSystem<Owner>
     {
         return m_Buffs.IndexOf(buff);
     }
+
     private BuffBase<Owner> RemoveAt(int index)
     {
         int buffsLastIndex = m_Buffs.Count - 1;
@@ -202,7 +235,7 @@ public class BuffSystem<Owner>
         result.AfterBeRemoved();
         OnRemoveBuff?.Invoke(result);
 
-        ObjectPool.Release(result, poolName);
+        ObjectPoolCSharpSimplified.Release(result, poolName);
 
         return result;
     }
@@ -210,7 +243,7 @@ public class BuffSystem<Owner>
     {
         //创建buff
         string poolName = typeof(Buff).FullName;
-        Buff buff = ObjectPool.Get<Buff>(poolName);
+        Buff buff = ObjectPoolCSharpSimplified.Get<Buff>(poolName);
         buff.Init(BuffDataManager.GetBuffData<Buff>());
         //初始化设置
         buff.SetOwner(m_Owner, provider);
@@ -233,6 +266,7 @@ public class BuffSystem<Owner>
         {
             item.Update();
         }
+        statusUIOwner?.UpdateStatusUI(m_Buffs.Cast<BuffBase<Entity>>().ToList());
     }
     public void FixedUpdate()
     {
@@ -241,6 +275,7 @@ public class BuffSystem<Owner>
             BuffBase<Owner> item = m_Buffs[i];
             //执行fixed update
             item.FixedUpdate();
+
             //如果不是永久性buff而且没有被冻结就要对时间进行处理
             if (!item.BuffData.isPermanent && item.TimeFreeze)
             {

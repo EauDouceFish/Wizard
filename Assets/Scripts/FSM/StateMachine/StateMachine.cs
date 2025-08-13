@@ -54,6 +54,14 @@ namespace PlayerSystem
         {
             currentState?.OnAnimationTransitionEvent();
         }
+
+        public void OnCastSpellAnimationEvent()
+        {
+            if (currentState is PlayerCastSpellState castSpellState)
+            {
+                castSpellState.ExecuteSpell();
+            }
+        }
     }
 
 }

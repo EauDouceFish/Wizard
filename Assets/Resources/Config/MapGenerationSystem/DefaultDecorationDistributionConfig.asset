@@ -12,15 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c991a7cb11aad87428e335f20c2456c5, type: 3}
   m_Name: DefaultDecorationDistributionConfig
   m_EditorClassIdentifier: 
-  minDenseRegionCount: 0
-  maxDenseRegionCount: 1
-  minSparseRegionCount: 0
-  maxSparseRegionCount: 3
+  minDenseRegionCount: 1
+  maxDenseRegionCount: 3
+  minSparseRegionCount: 2
+  maxSparseRegionCount: 4
   minLevel1DecorationCount_Dense: 1
   maxLevel1DecorationCount_Dense: 4
-  minLevel1DecorationCount_Sparse: 0
-  maxLevel1DecorationCount_Sparse: 2
+  minLevel1DecorationCount_Sparse: 2
+  maxLevel1DecorationCount_Sparse: 4
   minLevel2DecorationCount_Dense: 2
-  maxLevel2DecorationCount_Dense: 6
-  minLevel2DecorationCount_Sparse: 2
-  maxLevel2DecorationCount_Sparse: 4
+  maxLevel2DecorationCount_Dense: 5
+  minLevel2DecorationCount_Sparse: 4
+  maxLevel2DecorationCount_Sparse: 6
+  minOffsetLevel1: 4
+  maxOffsetLevel1: 10
+  minOffsetLevel2: 11
+  maxOffsetLevel2: 29.7

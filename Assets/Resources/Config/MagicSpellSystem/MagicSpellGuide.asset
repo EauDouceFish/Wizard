@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33eb463bfc192a145a427f24cb07b607, type: 3}
+  m_Name: MagicSpellGuide
+  m_EditorClassIdentifier: 
+  sprayTemplate: {fileID: 11400000, guid: ff61492f2c3657745bf508bd8e99b29a, type: 2}
+  ballTemplate: {fileID: 11400000, guid: 0398fb714cde6be499174766b2204947, type: 2}
+  rayTemplate: {fileID: 11400000, guid: 531bdadbcf9258f44a26bca93a6342b2, type: 2}
+  vineTemplate: {fileID: 11400000, guid: ef43cc18da81af5438df716d4527e4aa, type: 2}
+  buffTemplate: {fileID: 11400000, guid: 43ae5b6f64589ca4db9de920ee4b49be, type: 2}

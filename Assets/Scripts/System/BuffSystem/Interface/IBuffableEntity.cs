@@ -6,8 +6,8 @@ using UnityEngine;
 /// </summary>  
 public interface IBuffableEntity
 {
+    /// <summary>
+    /// 实体身上所有Buff的处理系统，需要初始化
+    /// </summary>
     BuffSystem<Entity> BuffSystem { get; }
-    HashSet<EntityBuffBase> Buffs { get; }
-    void AddBuff(EntityBuffBase buff);
-    void RemoveBuff(EntityBuffBase buff);
 }

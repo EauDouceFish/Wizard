@@ -39,6 +39,11 @@ public class PlayerAnimationEventTrigger : MonoBehaviour
         player.OnAnimationTranslate();
     }
 
+    public void OnCastSpellEvent()
+    {
+        player.OnCastSpellAnimationEvent();
+    }
+
     /// <summary>
     /// 根据层级判断是否可以打断，层级根据Animator中设置
     /// </summary>

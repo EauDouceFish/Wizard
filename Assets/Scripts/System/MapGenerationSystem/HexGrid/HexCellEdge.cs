@@ -15,6 +15,8 @@ public class HexCellEdge : ICanGetUtility
     // 全局共享的 障碍物组 和填充配置
     private static EdgeFillConfig fillConfig;
     private static GameObject obstacleGroup;
+    private GameObject battleObstacleContainer;             // 会随着战斗开闭的障碍物
+
 
     public HexCellEdge edgeConnected;                       // 和自己相连的边（共用边）
     public HexDirection direction;                          // 该边在所属HexCell的方向
@@ -170,6 +172,40 @@ public class HexCellEdge : ICanGetUtility
             case EdgeType.ExternalBoundary:
             default:
                 return ownerCell.HexRealm.GetRealmBiome().CommonMaterial;
+        }
+    }
+
+    /// <summary>
+    /// 设置战斗障碍物容器（由BoundFillStep调用）
+    /// </summary>
+    public void BindBattleObstacleContainer(GameObject container)
+    {
+        battleObstacleContainer = container;
+    }
+
+    /// <summary>
+    /// 显示Road上障碍物
+    /// </summary>
+    public void ShowBattleObstacles()
+    {
+        if (battleObstacleContainer != null)
+        {
+            battleObstacleContainer.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning("Battle obstacle container is not set. Please bind it before showing.");
+        }
+    }
+
+    /// <summary>
+    /// 隐藏Road上障碍物
+    /// </summary>
+    public void HideBattleObstacles()
+    {
+        if (battleObstacleContainer != null)
+        {
+            battleObstacleContainer.SetActive(false);
         }
     }
 

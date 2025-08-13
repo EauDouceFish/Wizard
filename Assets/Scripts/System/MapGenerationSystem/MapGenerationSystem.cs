@@ -4,28 +4,32 @@ using UnityEngine;
 using QFramework;
 public class MapGenerationSystem : AbstractSystem, IMapGenerationSystem
 {
-    GameCoreModel gameModel;
     MapModel mapModel;
-    //BiomeModel biomeModel;
 
     // 可定制的地图生成管线
     List<IMapGenerationStep> pipeline = new();
 
     protected override void OnInit()
     {
-        //biomeModel = this.GetModel<BiomeModel>();
-        gameModel = this.GetModel<GameCoreModel>();
         mapModel = this.GetModel<MapModel>();
 
         // MapGeneration Pipeline
         pipeline.Add(new BaseMapFillTestStep());
         pipeline.Add(new DivideHexMapStep());
         pipeline.Add(new InitBiomeStep());
-        pipeline.Add(new ConnectMainPathStep());
-        pipeline.Add(new DiffuseCellsStep());
+
+        //直接连接+随机传播
+        pipeline.Add(new ConnectMainPathStep());  // --1
+        pipeline.Add(new DiffuseCellsStep());     // --2
+        
+        //// 填充边界、装饰物
         pipeline.Add(new GroundModelFillStep());
         pipeline.Add(new BoundFillStep());
         pipeline.Add(new DecorationFillStep());
+
+        // 填充地图内物品、怪物
+        pipeline.Add(new RelocateBossStep());
+        pipeline.Add(new FillPropStep());
     }
 
     /// <summary>
@@ -39,6 +43,7 @@ public class MapGenerationSystem : AbstractSystem, IMapGenerationSystem
         {
             mapGenerationStep.Execute(mapModel);
         }
+
         this.SendEvent<MapGenerationCompletedEvent>();
     }
 
@@ -62,7 +67,6 @@ public class MapGenerationSystem : AbstractSystem, IMapGenerationSystem
 
 }
 
-// ��ͼ��С
 public enum MapSize
 {
     Default,

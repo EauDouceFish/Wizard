@@ -120,6 +120,33 @@ public class HexCellPathFinder : MonoBehaviour, IController
         return path;
     }
 
+    /// <summary>
+    /// 获取领域内距离领域中心最远的HexCell，用于重定位Player的出生点，以及设置终点位置
+    /// </summary>
+    /// <param name="hexRealm">要查找的领域</param>
+    /// <returns>距离中心最远的HexCell，如果领域为空返回null</returns>
+    public HexCell GetFarthestCellFromRealmCenter(HexRealm hexRealm)
+    {
+        List<HexCell> cellsInRealm = hexRealm.GetHexCellsInRealm();
+
+        Vector3 realmCenter = hexRealm.GetRealmCenterUponGround();
+        HexCell farthestCell = null;
+        float maxDistance = 0f;
+
+        foreach (HexCell cell in cellsInRealm)
+        {
+            float distance = Vector3.Distance(cell.transform.position, realmCenter);
+            if (distance > maxDistance)
+            {
+                maxDistance = distance;
+                farthestCell = cell;
+            }
+        }
+
+        return farthestCell;
+    }
+
+
     #region Architecture
     public IArchitecture GetArchitecture()
     {

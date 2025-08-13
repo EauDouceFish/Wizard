@@ -12,9 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4e45f83902152a4587c956b1693e2f3, type: 3}
   m_Name: PlayerData
   m_EditorClassIdentifier: 
-  entityName: Default Entity
-  baseHealth: 50
-  entityIcon: {fileID: 0}
-  entityPrefab: {fileID: 0}
-  playerBaseAttack: 10
-  playerBaseMoveSpeed: 5
+  playerName: Default Player
+  playerBaseHealth: 300
+  playerBaseAttack: 4

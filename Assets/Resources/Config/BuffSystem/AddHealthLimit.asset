@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81cceb10605b3524bb9dd48f5ff54912, type: 3}
   m_Name: AddHealthLimit
   m_EditorClassIdentifier: 
-  maxLevel: 99
+  maxLevel: 999
   isPermanent: 1
   maxDuration: 0.02
   demotion: 1

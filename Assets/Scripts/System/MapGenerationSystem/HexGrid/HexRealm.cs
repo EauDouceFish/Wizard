@@ -11,13 +11,10 @@ public class HexRealm : ICanGetModel
     private MapModel m_mapModel;
     private HexGrid m_hexGrid;
 
-    MapModel mapModel => m_mapModel ??= this.GetModel<MapModel>();
-    HexGrid hexGrid => m_hexGrid ??= mapModel.HexGrid;
-
     // 领域初始的HexCell
-    HexCell initHexCell;
+    private HexCell initHexCell;
     // 领域所拥有的群系环境
-    Biome realmBiome;
+    private Biome realmBiome;
     Color realmCellColor => realmBiome != null ? realmBiome.Color : Color.white;
 
     /// <summary>
@@ -60,6 +57,17 @@ public class HexRealm : ICanGetModel
     public Vector3 GetRealmCenterUponGround()
     {
         return GOExtensions.GetGroundPosition(initHexCell.transform.position);
+    }
+
+    /// <summary>
+    /// 重新设置领域的中心HexCell
+    /// </summary>
+    public void ResetRealmCenter(HexCell newCenter)
+    {
+        // 忽略不属于的HexCell
+        if (!realmHexCellDict.ContainsKey(newCenter.coord)) return;
+
+        initHexCell = newCenter;
     }
 
     /// <summary>

@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -15,11 +13,11 @@ public class PlayerAnimationData
     [Header("Grounded Parameter Names")]
     [SerializeField] private string idleParameterName = "IsIdling";
     [SerializeField] private string dashParameterName = "IsDashing";
-    [SerializeField] private string walkParameterName = "IsWalking";
+    //[SerializeField] private string walkParameterName = "IsWalking";
     [SerializeField] private string runParameterName = "IsRunning";
     [SerializeField] private string mediumStopParameterName = "IsMediumStopping";
     [SerializeField] private string hardStopParameterName = "IsHardStopping";
-
+    [SerializeField] private string castSpellParameterName = "IsCastingSpell";
     // Hash Code for strings
     // Group
     public int GroundedParameterHash { get; private set; }
@@ -34,6 +32,9 @@ public class PlayerAnimationData
     public int MediumStopParameterHash { get; private set; }
     public int HardStopParameterHash { get; private set; }
 
+    // Cast
+    public int CastSpellParameterHash { get; private set; }
+
     public void Initialize()
     {
         GroundedParameterHash = Animator.StringToHash(groundedParameterName);
@@ -43,6 +44,8 @@ public class PlayerAnimationData
         IdleParameterHash = Animator.StringToHash(idleParameterName);
         DashParameterHash = Animator.StringToHash(dashParameterName);
         //WalkParameterHash = Animator.StringToHash(walkParameterName);
+
+        CastSpellParameterHash = Animator.StringToHash(castSpellParameterName);
         RunParameterHash = Animator.StringToHash(runParameterName);
         MediumStopParameterHash = Animator.StringToHash(mediumStopParameterName);
         HardStopParameterHash = Animator.StringToHash(hardStopParameterName);

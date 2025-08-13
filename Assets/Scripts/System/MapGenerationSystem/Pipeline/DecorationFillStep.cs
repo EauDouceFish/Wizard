@@ -137,12 +137,13 @@ public class DecorationFillStep : IMapGenerationStep
             Vector3 decorationPosition = edgePosition + directionToCenter * offsetDistance;
             decorationPosition = GOExtensions.GetGroundPosition(decorationPosition);
 
-            // 随机选择模型
+            // 随机选择模型,创建装饰物实例
             GameObject selectedModel = decorationModels[Random.Range(0, decorationModels.Length)];
             Quaternion randomRotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
 
             Vector3 offset = selectedModel.GetModelGeometryOffsetPos();
-            // 创建装饰物实例
+            offset.y -= 0.2f;
+
             GameObject decorationInstance = Object.Instantiate(selectedModel, decorationPosition + offset, randomRotation);
             decorationInstance.transform.SetParent(decorationGroup.transform, false);
         }
